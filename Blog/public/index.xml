@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>A Hugo website</title>
+    <link>/</link>
+    <description>Recent content on A Hugo website</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 19 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>494 Notes</title>
+      <link>/2023/03/19/494-notes/</link>
+      <pubDate>Sun, 19 Mar 2023 00:00:00 +0000</pubDate>
+      
+      <guid>/2023/03/19/494-notes/</guid>
+      <description>Study Designs Forward Propagation Problems: Input Parameter \(\vec{x}\) \(\to\) Model a Functional \(\mathcal{F}\) \(\to\) Quantity of interest \(y = \mathcal{F}(\vec{x})\).
+Note; The input of \(\mathcal{F}\) could be function themselves. For example, \(\mathcal{F}\) could be a differential operator with \(\vec{x}\) as a coefficient.
+e.g.1
+$$ \mathcal{F} (f) = \frac{\partial f}{\partial z} \vec{x} $$ e.g.2
+The Fourier Transform Operator (which is incidentally also a linear operator )
+Question: If \(\vec{x}\) is stochastic, what can we say about \(y = \mathcal{F}(\vec{x})\)?</description>
+    </item>
+    
+    <item>
+      <title>Hello R Markdown</title>
+      <link>/2020/12/01/hello-r-markdown/</link>
+      <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
+      
+      <guid>/2020/12/01/hello-r-markdown/</guid>
+      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars) ## speed dist  ## Min. : 4.0 Min. : 2.00  ## 1st Qu.:12.0 1st Qu.: 26.00  ## Median :15.0 Median : 36.00  ## Mean :15.4 Mean : 42.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>/about/</link>
+      <pubDate>Thu, 05 May 2016 21:48:51 -0700</pubDate>
+      
+      <guid>/about/</guid>
+      <description>This is a &amp;ldquo;hello world&amp;rdquo; example website for the blogdown package. The theme was forked from @jrutheiser/hugo-lithium-theme and modified by Yihui Xie.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Hugo 0.91.2" />
+
+
+<title>494 Notes - A Hugo website</title>
+<meta property="og:title" content="494 Notes - A Hugo website">
+
+
+  <link href='/favicon.ico' rel='icon' type='image/x-icon'/>
+
+
+
+  
+
+
+
+
+
+
+
+
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css' rel='stylesheet' type='text/css' />
+
+
+
+<link rel="stylesheet" href="/css/fonts.css" media="all">
+<link rel="stylesheet" href="/css/main.css" media="all">
+
+
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="header">
+        <nav class="nav">
+  <a href="/" class="nav-logo">
+    <img src="/images/logo.png"
+         width="50"
+         height="50"
+         alt="Logo">
+  </a>
+
+  <ul class="nav-links">
+    
+    <li><a href="/about/">About</a></li>
+    
+    <li><a href="https://github.com/rstudio/blogdown">GitHub</a></li>
+    
+    <li><a href="https://twitter.com/rstudio">Twitter</a></li>
+    
+  </ul>
+</nav>
+
+      </header>
+
+
+<main class="content" role="main">
+
+  <article class="article">
+    
+    <span class="article-duration">20 min read</span>
+    
+
+    <h1 class="article-title">494 Notes</h1>
+
+    
+    <span class="article-date">2023-03-19</span>
+    
+
+    <div class="article-content">
+      <h2 id="study-designs">Study Designs</h2>
+<h4 id="forward-propagation-problems">Forward Propagation Problems:</h4>
+<p>Input Parameter <code>\(\vec{x}\)</code> <code>\(\to\)</code> Model a Functional <code>\(\mathcal{F}\)</code> <code>\(\to\)</code> Quantity of interest <code>\(y = \mathcal{F}(\vec{x})\)</code>.</p>
+<p>Note; The input of <code>\(\mathcal{F}\)</code> could be function themselves. For example, <code>\(\mathcal{F}\)</code> could be a differential operator with <code>\(\vec{x}\)</code> as a coefficient.</p>
+<p>e.g.1</p>
+<p>$$ \mathcal{F} (f) = \frac{\partial f}{\partial z} \vec{x} $$
+e.g.2</p>
+<p>The Fourier Transform Operator (which is incidentally also a linear operator )</p>
+<p>Question: If <code>\(\vec{x}\)</code> is stochastic, what can we say about <code>\(y = \mathcal{F}(\vec{x})\)</code>?</p>
+<p>3 Pillars of solving Forward Propagation Problems:</p>
+<ul>
+<li>Sampling Methods (Gibbs Sampling, MCMC, etc.)</li>
+<li>Stochastic Collocation</li>
+<li>Spectral Methods</li>
+</ul>
+<h4 id="monte-carlo">Monte Carlo</h4>
+<p>Broadly, Monte Carlo methods are those such that one acquires information about a system by simulating it with random sampling.</p>
+<p>e.g.Nagel-SchreKenberg Traffit Modelling: Some traffic jams have no obvious cause. An aerial videos show that traffic jams spontaneously appear, move &ldquo;backwards&rdquo; (against traffic flow), and eventually disappears.</p>
+<p>Model Assumptions:</p>
+<ul>
+<li>Single Lane</li>
+<li>M chuncks of road labelled 0,&hellip;,M-1</li>
+<li>Discrete time steps of identical length</li>
+<li>One way</li>
+<li>Each hypothetical car occupies one space.</li>
+<li>Constant flow of cars</li>
+<li>Car with velocity <code>\(v\geq 0\)</code> move <code>\(v\)</code> steps foward in <code>\(1\)</code> time step</li>
+<li>Some speed limit $v_{\max} &gt; 0 $</li>
+</ul>
+<p>Update Rules For a Single Car:</p>
+<p>Input:</p>
+<ul>
+<li>position <code>\(x\in\{0,1,\cdots, M-1\}\)</code></li>
+<li>Distance <code>\(d&gt;0\)</code> between it and the car in front of it</li>
+<li>Given probability <code>\(0&lt;p&lt;1\)</code> of randomly slowing down ($p$ is a constant, same for all cars ).</li>
+</ul>
+<p>Update:</p>
+<ul>
+<li>If the car&rsquo;s velocity is less that <code>\(v_{\max}\)</code>, increase <code>\(v\)</code> by <code>\(1\)</code> unit, because drivers want to go.</li>
+<li>If <code>\(v*1(\text{time unit}) \geq d\)</code>, set <code>\(v\)</code> to <code>\(d-1\)</code> unit to avoid collision.</li>
+<li>With probability <code>\(p\)</code>, slow down by 1 unit, set <code>\(v = \max(v-1,0)\)</code> with probability <code>\(p\)</code>.</li>
+</ul>
+<p>Post-Update: Move Forward <code>\(v\)</code> spots.</p>
+<p>Initial Positions: <code>\(N\)</code> cars put in <code>\(M\)</code> slots by samping <code>\(N\)</code> total values from <code>\(\{0,\cdots,M-1\}\)</code> uniformly without replacement.</p>
+<p>Intitial Velocity: every car starts with Velocity 0, with a &ldquo;burn in&rdquo; perior (about 3000 steps if p = 0.5)</p>
+<p>Review: A continuous random variable <code>\(X\)</code> is a continuous map <code>\(X: \Omega \to \mathbb{R}\)</code>, where
++ <code>\(\Omega\)</code> is any non empty set (event space) representing &ldquo;abstract elementary events&rdquo; (something in the real world we actually observe that doesn&rsquo;t immediately have an associated numerical value)
++ <code>\(X\)</code> is effectively a probability measure
++ &ldquo;Randomness&rdquo; comes from not knowing the input event <code>\(\omega\in\Omega\)</code>.
++ We can assign a probability associated with certain outcomes:</p>
+<pre><code>$$ \mathbb{P}(X\leq a) = \mathbb{P}(\{\omega\in\Omega|X(\omega)\leq a\})$$
+</code></pre>
+<p>A probability density function of a random variable <code>\(X\)</code> is a map</p>
+<p>$$f_x \to \mathbb{R}\geq 0 $$
+The property of a probability density function is derived naturally from the property of measures:</p>
+<p>(1). For <code>\(a,b\in \mathbb{R}\)</code>, we have</p>
+<p>$$ P(a\leq X \leq b) = \int_{[a,b]} f_X(s) d,s  $$</p>
+<p>(2). The probability of the sample space is <code>\(1\)</code>, namely:</p>
+<p>$$\int_{\Omega} f_X(s) d,s = 1  $$</p>
+<p>(3). <code>\(f_X \geq 0\)</code></p>
+<p>e.g.1. <code>\(X\)</code> conforms to a standard normal distribution <code>\(X\sim \mathcal{N}(0,1)\)</code>.</p>
+<p>$$f_X: \mathbb{R} \to \mathbb{R} \geq 0 $$</p>
+<p><code>$$f_X(y) = \frac{1}{\sqrt{2\pi}}\exp(-\frac{y^2}{2})$$</code></p>
+<p>e.g.1. <code>\(X\)</code> conforms to a uniform distribution <code>\(X\sim \mathcal{U}(c,d)\)</code>.</p>
+<p>$$f_X: \mathbb{R} \to \mathbb{R} \geq 0 $$</p>
+<p><code>$$f_X(y) = \frac{1}{d-c}$$</code></p>
+<p>Mean and Variance</p>
+<p>For a continuous random variable <code>\(X\)</code> with probability distribution function <code>\(f_X(x)\)</code>, define the mean as</p>
+<p>$$ \mathbb{E}[X] = \int_{-\infty}^{\infty} yf_X(y) dy $$</p>
+<p>$$ \text{Var}[X] = \int_{-\infty}^{\infty} (y-\mathbb{E}[X] )^2 f_X(y) dy $$</p>
+<p>Theorem: Consider some independent and identically distributed random variables <code>\(\{Y_1,Y_2,\cdots,Y_n\}\)</code>. If <code>\(\mathbb{E}[Y_i]&lt;\infty\)</code>,</p>
+<p>then $$ s_n := \frac{1}{n} \sum_{i=1}^n Y_i $$</p>
+<p>converges in &ldquo;some sense&rdquo; to the true mean <code>\(\mathbb{E}[Y_i]\)</code>.</p>
+<p>In particular, the <strong>weak law of large number</strong> states that for all <code>\(\epsilon&gt;0\)</code>,</p>
+<p><code>$$\lim_{n\to\infty} \mathbb{P} (|s_n - \mathbb{E}(y_i)|&gt;\epsilon) = 0$$</code></p>
+<p>(This is called convergence in probability)</p>
+<p>Simple Monte Carlo:</p>
+<ul>
+<li>
+<p>Express some quantity of interest as the expected value of some RV Y</p>
+</li>
+<li>
+<p>Generate values <code>\(Y_1,\cdots,Y_n\)</code> independently from the distribution of <code>\(Y\)</code></p>
+</li>
+<li>
+<p>Take the average $s_n = \displaystyle \frac{1}{n} \sum_{i=1}^n Y_i $</p>
+</li>
+</ul>
+<p>e.g.1 Suppose we want to evaluate <code>\(\pi\)</code>. We randomly generate vectors in <code>\(z \in [-1,1]\times[-1,1]\)</code> and see how many of them satisfies <code>\(\|z\|\leq 1\)</code>. As <code>\(N\to\infty\)</code>, the ratio approximates <code>\(\pi/4\)</code></p>
+<pre tabindex="0"><code>## [1] 3.14056
+</code></pre><p>$$ \mathbb{E}[Y_i] =  \mathbb{E}[Y_i|\vec{X^{(i)}}\in \mathcal{R}] \mathbb{P} [\vec{X^{(i)}}\in \mathcal{R}] + \mathbb{E}[Y_i|\vec{X^{(i)}}\notin \mathcal{R}] \mathbb{P} [\vec{X^{(i)}}\notin \mathcal{R}] = \mathbb{P} [\vec{X^{(i)}}\in \mathcal{R}]  $$</p>
+<p>$$ = \int_{\mathcal{R}} f_{\vec{X^{(i)}}} (x,y) d,y d,x  $$</p>
+<p>Generate $\vec{X^{(i)}} \sim (\mathcal{U}(0,1),\mathcal{U}(0,1))  $ and compute the ratio of the dots in the area over total number of dots.</p>
+<p>Pro:</p>
+<ul>
+<li>This estimate is unbiased because <code>\(\mathbb{E}[S_n] = \mathbb{E[Y]}\)</code></li>
+</ul>
+<p>Con:</p>
+<ul>
+<li>We do not know how big <code>\(n\)</code> should be such that the error</li>
+</ul>
+<p><code>$$\epsilon = \|\mathbb{E}[s_n] - \mathbb{E}[Y_i] \|$$</code></p>
+<p>If <code>\(\text{Var}[Y]=\sigma^2 &lt;\infty\)</code>,</p>
+<p>$$ \text{Var}[S_n] = \text{Var} \left[\sum_{i=1}^n \frac{1}{n} Y_i\right] =  \sum_{i=1}^n \text{Var} \left[\frac{1}{n} Y_i\right] = \frac{1}{n^2}\sum_{i=1}^n \text{Var} \left[ Y_i\right] = \frac{\sigma^2}{n}$$</p>
+<p>Root Mean Square Error:</p>
+<p>For <code>\(p&gt;1\)</code>,</p>
+<p>$$\text{p-th RMSE} = \left( \mathbb{E}[(s_n - \mathbb{E}(s_n))^p]^{\frac{1}{p}} \right) $$
+Notably when <code>\(p=2\)</code> and <code>\(n\to\infty\)</code>,</p>
+<p><code>$$\text{2-nd RMSE} = \left( \mathbb{E}[(s_n - \mathbb{E}(s_n))^2]^{\frac{1}{2 }} \right)  = \left( \mathbb{E}[(s_n - \mathbb{E}(Y))^2]^{\frac{1}{2 }} \right)  = \sqrt{\text{Var}(S_n)}$$</code></p>
+<p>The simple MC has convergence on the order of <code>\(n^{-\frac12}\)</code> because <code>\(\sqrt{\text{Var}(S_n)} = \frac{\sigma}{\sqrt{n}}\)</code>.</p>
+<p>This is slow, but independent of the dimensional <code>\(\alpha\)</code></p>
+<p>If <code>\(\text{Var}[Y]=\sigma^2 &lt;\infty\)</code>, we can apply the Strong Law of Large Numbers, namely:</p>
+<p>Quadrature Rules/ Methods:</p>
+<p>$$\mathbb{E}[\mathcal{F}(X)] = \int_{\mathbb{R}} \mathcal{F}(y) f_Y(y) ,dy \simeq \sum_{k=1}^n \nu_k \mathcal{F} (\lambda_{k} ) $$</p>
+<ul>
+<li>
+<p>Gaussian Quadrature:</p>
+<ul>
+<li>Summation is exact for polynomials of a certain max degree.</li>
+</ul>
+</li>
+<li>
+<p>Orthogonal Polynomials + GQ:</p>
+<ul>
+<li>
+<p>Let <code>\(\mathbb{P}\)</code> be the space of real polynomials on <code>\(\mathbb{R}\)</code>, and <code>$$\mathbb{P}_n = \{p\in \mathbb{P}|\deg(p)\leq n\}$$</code></p>
+</li>
+<li>
+<p>Let <code>\(\{\pi_k\}_0^\infty\)</code> be a set of polynomials that are orthogonal w.r.t. the PDF <code>\(f\)</code> of the function <code>\(\mathcal{F}\)</code>. (Example: The Legendre polynomials )</p>
+</li>
+<li>
+<p>If <code>\(X\sim N(0,1)\)</code>, then <code>\(\{\pi_k\}_0^\infty\)</code> are called the Hermite polynomials. The &ldquo;probabilist&rsquo;s Hermite polynomials&rdquo; are given by $$
+{\displaystyle { {He}}_{n}(x)=(-1)^{n}e^{\frac {x^{2}}{2}}{\frac {d^{n}}{dx^{n}}}e^{-{\frac {x^{2}}{2}}} }$$`</p>
+</li>
+<li>
+<p>If <code>\(X\sim U[0,1]\)</code>, then <code>\(\{\pi_k\}_0^\infty\)</code> are called the Legendre polynomials.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>We say that <code>\(\pi_i,\pi_j \in \mathbb{P}(\mathbb{R})\)</code> are orthogonal wrt a PDF <code>\(f\)</code> if</p>
+<p>$$ \int_{\mathbb{R}} \pi_i(y) \pi_j(y) f(y) ,dy = \delta_{i,j} $$</p>
+<p>where the Kronecker&rsquo;s Delta</p>
+<p>$$\delta_{i,j} = \begin{cases} c \phantom{&ndash;} i = j \ 0 \phantom{&ndash;} i \neq j\end{cases} $$</p>
+<p>Alternatively, because <code>\(\pi_i(s),\pi_j(s)\in\mathbb{P}(\mathbb{R})\)</code>,</p>
+<p>we can think of the L-2 inner product, namely:</p>
+<p>$$ \langle \pi_i, \pi_j \rangle_{L^2(f)} $$</p>
+<p>It is known that orthogonal polynomials satisfy a 3-term recurrence:</p>
+<p><code>$$\beta_{k+1} \pi_{k+1} (s) = (s-\alpha_k)\pi_k(s) - \beta_k \pi_{k-1}(s)$$</code></p>
+<p>where <code>\(k\in \mathbb{N}, \{\alpha_k\},\{\beta_k\}\subset \mathbb{R}\)</code></p>
+<p>For edge cases, let <code>\(\pi_{-1} = 0\)</code> and <code>\(\pi_0 = 1\)</code>.</p>
+<p>Denote</p>
+<p>$$\vec{\pi}(s) = \begin{pmatrix} \pi_0(s) \ \pi_1(s) \ \vdots \ \pi_{n-1}(s) \end{pmatrix} $$</p>
+<p>and <code>\(\vec{e}_n\)</code> = nth standard basis vector, then for <code>\(k\in\{0,1,\cdots,n-1\}\)</code> we can rewrite as:</p>
+<p>$$ s\vec{\pi}(s) = \mathcal{J}_n \vec{\pi}(s) + \beta_n \pi_n(s) \vec{e}_n $$</p>
+<p>where</p>
+<p>$$ \mathcal{J}<em>n =\begin{bmatrix} \alpha_0  &amp; \beta_1 &amp; \cdots \ \beta_1 &amp; \alpha_1 &amp; \beta_2 \cdots \ \phantom{-} &amp; \ddots &amp; \ddots&amp;  \ \phantom{-} &amp; \ddots &amp; \ddots &amp; \beta</em>{n-1} \ \phantom{-} &amp; \cdots &amp; \beta_{n-1}  &amp; \alpha_{n-1}\end{bmatrix} $$</p>
+<p>For proof consider induction.</p>
+<p>Now multiply</p>
+<p>$$ \pi_k: \mathbb{R} \to \mathbb{R} , \deg(\pi_k) = k , \pi_k (s) = \sum_{i=0}^k c_is^i$$</p>
+<p>Multiply through by <code>\(\pi_k(s)\)</code> for fixed but arbitraty <code>\(k\)</code>,</p>
+<p><code>$$s\pi_k^2(s) = \beta_{k+1} \pi_{k+1}(s) \pi_{k} (s) +\alpha_k\pi^2_k(s)+ \beta_k \pi_{k-1}(s)\pi_{k+1}(s)$$</code></p>
+<p>Now consider</p>
+<p>$$ \int_{\mathcal{D}} s\pi_k^2(s) f(s) ,ds = \langle \text{id}, \pi_k^2\rangle $$</p>
+<p>Note that</p>
+<p>$$ \int_{\mathcal{D}} \beta_{k+1} \pi_{k+1}(s) \pi_{k} (s) +\alpha_k\pi^2_k(s)+ \beta_k \pi_{k-1}(s)\pi_{k+1}(s) ,ds = \alpha_k\langle \pi_k,\pi_k \rangle_f $$</p>
+<p>Thus</p>
+<p>$$\alpha_k = \frac{\langle \text{id}, \pi_k^2\rangle_f}{\langle \pi_k, \pi_k\rangle_f} $$</p>
+<p>Given that the polynomials can be orthonormal ($|\pi_k|_{L^2(\mathcal{C})} = 1$) a general form of <code>\(\alpha_i\)</code> and <code>\(\beta_i\)</code>, namely</p>
+<p><code>$$\begin{cases} &amp; \alpha_i = \\ &amp; \beta_i = \\ \end{cases}$$</code></p>
+<p>Inner product:</p>
+<p>Let <code>\(V\)</code> be a vetor space with an underlying field <code>\(\mathcal{F}\)</code> for scalars,</p>
+<p>Then an inner product is a map <code>\(\langle \cdot , \cdot  \rangle: V\times V \ to \mathcal{F}\)</code> s.t. for all <code>\(x,y,z, \in V\)</code> and <code>\(a\in\mathcal{F}\)</code>,</p>
+<ul>
+<li>
+<p>Conjugate Symmetry: <code>\(\langle x,y \rangle = \overline{\langle y,x \rangle}\)</code></p>
+</li>
+<li>
+<p>Lineararity: $\langle ax+y,z \rangle = a\langle x,z \rangle + \langle y,z \rangle $</p>
+</li>
+<li>
+<p>Positive Definiteness: <code>\(x\neq 0_v \iff \langle x, x\rangle &gt; 0\)</code> (works for matrix- just put the transpose to Hermitian )</p>
+</li>
+</ul>
+<p>Let <code>\(\xi\)</code> be a RV with PDF <code>\(f:\mathbb{R} \to \mathbb{R}\)</code>. Let <code>\(\mathcal{D}\)</code> be the support of <code>\(f\)</code>.</p>
+<p>Let <code>\(V = \mathcal{C}(\mathcal{D},\mathbb{R}) = \{g: \mathcal{D}\to \mathbb{R} | g \text{ is continuous}\}\)</code></p>
+<ul>
+<li>
+<p><code>\(V\)</code> is closed under linearity.</p>
+</li>
+<li>
+<p><code>\(0_v\)</code> exists</p>
+</li>
+</ul>
+<p>Not necessarily but: <code>\(V\)</code> is complete under <code>\(\|\|_2\)</code>. That is, for any <code>\(u_n \subset V\)</code>, <code>$$\lim_{n\to\infty} u_n \in V.$$</code> ?</p>
+<p>$$\langle g,h \rangle_f = \int_\mathcal{D} g(s)h(s) f(s) ,ds $$</p>
+<p><code>\(g,h,\in V\)</code>:</p>
+<ul>
+<li>
+<p><code>\(\langle h,g \rangle  = \langle g,h \rangle\)</code> is immediate.</p>
+</li>
+<li>
+<p><code>$$\begin{aligned} \langle ag+h,p \rangle_f  &amp;= \int_\mathcal{D} [ag(s)+h(s)] p(s)f(s) \,ds \\ &amp;= a \int_\mathcal{D} g(s)p(s)f(s) \,ds +  \int_\mathcal{D} h(s)p(s)f(s) \,ds \\ &amp;= a\langle g,p\rangle_f + \langle h,p \rangle_f\end{aligned}$$</code></p>
+</li>
+<li>
+<p>Assume that <code>\(g\neq 0_v\)</code>. This implies <code>\(\exists s^*\in \mathcal{D}\)</code> s.t. <code>\(g^2(s^*)&gt;0\)</code>. Due to the definition of the support, <code>\(f(s^*)&gt;0\)</code>.</p>
+</li>
+</ul>
+<p>$$\begin{aligned} \langle g,g \rangle_f  &amp;= \int_\mathcal{D} g^2(s) f(s) ,ds &gt;0 \end{aligned} $$</p>
+<p>For two functions <code>\(g,h \in V=\mathcal{C}(\mathcal{D},\mathbb{R})\)</code>  to be orthogonal wrt the pdf of <code>\(\xi\)</code> , we need <code>\(\langle g,h \rangle_f = 0\)</code> if</p>
+<p>$$\begin{aligned} \langle g,h \rangle_f  &amp;= \int_\mathcal{D} g(s)h(s) f(s) ,ds \ &amp;= 0  \end{aligned} $$</p>
+<p>Recall that Let <code>\(\{\pi_k\}_0^\infty\)</code> be a set of polynomials that are orthogonal w.r.t. the PDF <code>\(f\)</code> of the function <code>\(\xi \in \mathcal{F}\)</code>, with 
+<code>$$\pi_k: \mathcal{D}\to\mathbb{R} \text{ s.t. } \deg(\pi_k) = k$$</code>. (Example: The Legendre polynomials )</p>
+<p>We say that <code>\(\pi_i,\pi_j \in \mathbb{P}(\mathbb{R})\)</code> are orthogonal wrt a PDF <code>\(f\)</code> for some continuous <code>\(\xi\)</code> if</p>
+<p>$$ \int_{\mathbb{R}} \pi_i(y) \pi_j(y) f(y) ,dy = c_i \delta_{i,j} $$</p>
+<p>where the Kronecker&rsquo;s Delta</p>
+<p>$$\delta_{i,j} = \begin{cases} 1 \phantom{&ndash;} i = j \ 0 \phantom{&ndash;} i \neq j\end{cases} $$</p>
+<p>e.g.  <code>\(\{\pi_k\}_0^\infty\)</code> are Hermite <code>\(\to\)</code> <code>\(c_k=k!\)</code></p>
+<table>
+<thead>
+<tr>
+<th><code>\(\xi\)</code> distribution</th>
+<th>$\pi_k$ family</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>\(N(0,1)\)</code></td>
+<td>Hermite</td>
+</tr>
+<tr>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</td>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;</td>
+</tr>
+<tr>
+<td><code>\(U(-1,1)\)</code></td>
+<td>Legendre</td>
+</tr>
+<tr>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</td>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;</td>
+</tr>
+<tr>
+<td><code>\(\text{Beta}(\alpha,\beta)\)</code>  <code>\(\alpha&gt;-1\)</code></td>
+<td>Jacobi</td>
+</tr>
+<tr>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-</td>
+<td>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;</td>
+</tr>
+<tr>
+<td><code>\(\Gamma(\alpha,\beta)\)</code> <code>\(\alpha,\beta&gt;-1\)</code></td>
+<td>Laguerre</td>
+</tr>
+</tbody>
+</table>
+<p>Fact:</p>
+<p>If <code>\(\xi\)</code> has all finite moments, namely</p>
+<p>$$ \int_\mathcal{D} s^k f(s) ,ds &lt;\infty, k\in\mathbb{N}^+ $$</p>
+<p>Then,</p>
+<p>$$\text{span}( {\pi_k}_0^\infty )\subseteq  \mathcal{C}(\mathcal{D},\mathbb{R}) $$</p>
+<p>(Sidenote: <code>\(\text{span}( \{\pi_k\}_0^\infty )\)</code> is equivalent to $L^2_\mathcal{C}(\mathcal{D},\mathbb{R}) $)</p>
+<p>This is defined as <code>\(L^2_\mathcal{C}(\mathcal{D},\mathbb{R}\)</code>, also called the space of random variables with finite second moments (when <code>\(f\)</code>) is a pdf:</p>
+<p><code>$$\mathbb{E}(g(\xi)^2) = \int_{\mathcal{D}} g(x)^2 f(x) \, dx = \langle g,g \rangle_f$$</code></p>
+<p>Cauchy-Schwartz Inequality: for two elements <code>\(u,v\)</code> in a vector space,</p>
+<p><code>$${\displaystyle \left|\langle \mathbf {u} ,\mathbf {v} \rangle \right|^{2}\leq \langle \mathbf {u} ,\mathbf {u} \rangle \cdot \langle \mathbf {v} ,\mathbf {v} \rangle }$$</code>
+If <code>\(\xi\)</code> has all finite moments,</p>
+<p>$$ \text{span} ({\pi_k}_{k=0}^\infty) = L^2_c(\mathcal{D},\mathbb{R},f)$$</p>
+<p>SUbspace Theorem: if the subspace is closed under linear operations and contains the zero vector, then the subspace is itself a vector space.</p>
+<p>Note that in particular,</p>
+<p><code>$$\vec{\pi}(s) = \mathcal{J}_n \vec{ \pi}(s) + \beta_n \pi_n(s) \vec{e}_n$$</code></p>
+<p>And given that <code>\(\lambda_n\)</code> is a root of <code>\(\pi_n\)</code>,</p>
+<p>$$ \lambda_n \vec{\pi} (\lambda_n) = \mathcal{J}_n \vec{\pi} (\lambda_n)  $$</p>
+<p>which implies that</p>
+<p><code>\(\vec{\pi} (\lambda_n)\)</code> is an eigenvector of <code>\(\mathcal{J}_n\)</code> with eigenvalue <code>\(\lambda_n\)</code></p>
+<p>Def: Let <code>\(A\in \mathbb{R}^{n\times n}\)</code>. We say that <code>\(v\in \mathbb{R}^{n} \neq \vec{0}\)</code> is an eigenvector of <code>\(A\)</code> if</p>
+<p>$$ Av= \lambda v $$</p>
+<p>for some scalar <code>\(\lambda\)</code>. Then <code>\(v\)</code> is called the eigen vector of <code>\(A\)</code> with associated eigenvalue <code>\(\lambda\)</code>.</p>
+<p>Consider <code>$$s\vec{\pi}(s) = \mathcal{J}_n \vec{\pi}(s) + \beta_n \pi_n(s) \vec{e}_n$$</code></p>
+<p>where</p>
+<p>$$\vec{\pi}(s) = \begin{pmatrix} \pi_0(s) \ \pi_1(s) \ \vdots \ \pi_{n-1}(s) \end{pmatrix} $$</p>
+<p>and</p>
+<p>$$ \mathcal{J}<em>n =\begin{bmatrix} \alpha_0  &amp; \beta_1 &amp; \cdots \ \beta_1 &amp; \alpha_1 &amp; \beta_2 \cdots \ \phantom{-} &amp; \ddots &amp; \ddots&amp;  \ \phantom{-} &amp; \ddots &amp; \ddots &amp; \beta</em>{n-1} \ \phantom{-} &amp; \cdots &amp; \beta_{n-1}  &amp; \alpha_{n-1}\end{bmatrix} $$</p>
+<p>Let <code>\(\lambda_j\)</code> be a root of the <code>\(\deg n\)</code> polynomial <code>\(\pi_n\)</code>. Thus <code>\(\pi_n(\lambda_j) = 0\)</code>. Substitute <code>\(s=\lambda_j\)</code> nn</p>
+<p><code>$$\lambda_j \vec{\pi}(j) = \mathcal{J}_n \vec{\pi}(j) + \beta_n \pi_n(\lambda_j) \vec{e}_n$$</code></p>
+<p>And due to <code>\(\pi_n(\lambda_j) = 0\)</code>,</p>
+<p><code>$$\lambda_j \vec{\pi}(\lambda_j) = \mathcal{J}_n \vec{\pi}(\lambda_j)$$</code></p>
+<p>Is <code>\(\vec{\pi}(\lambda_j)\)</code> non-zero? <code>\(\pi_0 = 1\)</code> By definition, so yes, non-zero.</p>
+<p>Thus $$\vec{\pi}(\lambda_j) = \begin{pmatrix} \pi_0(\lambda_j) \ \pi_1(\lambda_j) \ \vdots \ \pi_{n-1}(\lambda_j) \end{pmatrix} $$ is an eigenvector of <code>\(\mathcal{J}_n\)</code> with eigenvalue <code>\(\lambda_j\)</code>.</p>
+<p>Two important corrolaries:</p>
+<ul>
+<li>
+<p><code>\(\lambda_j\)</code> are real-valued, since <code>\(\mathcal{J}_n\)</code> is symmetric.</p>
+</li>
+<li>
+<p><code>\(\lambda_j\)</code> are distinct. (why? Proof of contradiction by class)</p>
+</li>
+</ul>
+<p>Gaussian Quadratures:</p>
+<p>$$\mathbb{E}[\mathcal{F}(X)] = \int_{\mathbb{R}} \mathcal{F}(y) f_Y(y) ,dy \approx\sum_{k=1}^n \nu_k \mathcal{F} (\lambda_{k} ) $$</p>
+<p>How &ldquo;approximate&rdquo;?</p>
+<p>Def: The Lagrange cardinal function are <code>\(\ell_i: \mathbb{R} \to \mathbb{R}\)</code> s.t.</p>
+<p><code>$$\ell_i(s) = \prod_{j\neq i} \frac{s-\lambda_j}{\lambda_i - \lambda_j }$$</code></p>
+<p>Corrolary: <code>\(\ell_j(\lambda_j) = \delta_{ij}\)</code></p>
+<p>Def: An <code>\(n\)</code>-point quadrature rule is exact of degree <code>\(m\)</code> if</p>
+<p>$$\int_{\mathcal{D} }\mathcal{G}(y) f_Y(y) ,dy \approx\sum_{k=1}^n \nu_k \mathcal{G} (\lambda_{k} ) $$</p>
+<p>where</p>
+<p>$$ \nu_k = \int_{\mathcal{D} }  \ell_k (s) f(s) , ds$$</p>
+<p>The coefficients <code>\(\nu_k\)</code> are positive.</p>
+<p>Pf：Consider <code>\(l_k^2\)</code>, as <code>\(\deg(l_k^2)=2n-2\)</code>.</p>
+<p>By exactness (which we will soon show), the equation holds.</p>
+<p>$$
+<code>\begin{aligned} \langle l_k,l_k\rangle_f &amp;= \int_{\mathcal{D} }  \ell^2_k (s) f(s) \, ds \\ &amp;= \sum_{k=1}^n \nu_k \ell^2_k  (\lambda_{k} ) \\ &amp;= \sum_{k=1}^n \nu_k (\delta_{ik})^2 \\ &amp;=\nu_k  \end{aligned}</code>
+$$</p>
+<p>Note that <code>\(\langle l_k,l_k\rangle_f = \|l_k\|_f &gt;0\)</code>.</p>
+<p>for all polynomials <code>\(\mathcal{G}\in \mathbb{P}(\mathcal{D},\mathbb{R})\)</code>.</p>
+<p>Thm: Gaussian quadrature is exact of degree <code>\(2n-1\)</code>.</p>
+<ul>
+<li>
+<p>For general quadratures, the quadrature points <code>\(\{\lambda_j\}_1^n \subset \mathbb{R}\)</code> are distinct.</p>
+</li>
+<li>
+<p>For Gaussian quadratures, the quadrature points <code>\(\{\lambda_j\}_1^n \subset \mathbb{R}\)</code> are picked to be the roots of <code>\(\{\pi_j\}_1^n\)</code>.</p>
+</li>
+</ul>
+<p>Suppose <code>\(\mathcal{G}\in \mathbb{P}^{n-1}\)</code>, then we will define the interpolation polynomial <code>\(Q^\mathcal{G}:\mathbb{R}\to\mathbb{R}\)</code> s.t.</p>
+<p>$$Q^\mathcal{G}(x) = \sum_{k=1}^n \mathcal{G}(\lambda_k) \ell_k(x) $$</p>
+<p>Then <code>\(\deg(Q^\mathcal{G}) \leq n-1\)</code> and for all <code>\(i=1,2,\cdots n\)</code>,</p>
+<p>$$ Q^\mathcal{G}(\lambda_i) = \sum_{k=1}^n \mathcal{G}(\lambda_k) \ell_k(\lambda_i) = \sum_{k=1}^n \mathcal{G}(\lambda_k) \delta_{ik} =  \mathcal{G}(\lambda_i)$$</p>
+<p>Now consider <code>\(\mathcal{G}^\prime = \mathcal{G}-Q^\mathcal{G} \in \mathbb{P}^{n-1}(\mathcal{D})\)</code>, then</p>
+<p><code>$$\mathcal{G}^\prime(\lambda_k) = g(\lambda_k) -Q^g(\lambda_k)  = 0$$</code></p>
+<p>So <code>\(\{\lambda_j\}_1^n \subset \mathbb{R}\)</code> are roots of <code>\(g-Q^g\)</code>. By the Fundamental Theorem of Algebra, <code>\(g-Q^g\)</code> must be the zero polynomial.</p>
+<p>Thus, <code>\(\mathcal{G}=Q^\mathcal{G}\)</code>.</p>
+<p>Ultimately,</p>
+<p>$$
+<code>\begin{aligned} &amp; \int_{\mathcal{D} }\mathcal{G}(y) f_Y(y) \,dy \\ &amp;= \int_{\mathcal{D} }Q^\mathcal{G}(y) f_Y(y) \,dy \\ &amp;= \int_{\mathcal{D} } \left(\sum_{k=1}^n \mathcal{G}(\lambda_k) \ell_k(\lambda_i)\right) f_Y(y) \,dy \\ &amp;=  \sum_{k=1}^n \mathcal{G}(\lambda_k) \left(\int_{\mathcal{D} }  \ell_k(y) f_Y(y) \,dy  \right) \end{aligned}</code>
+$$</p>
+<p>Where we define</p>
+<p>$$
+\nu_k = \int_{\mathcal{D} }  \ell_k(y) f_Y(y) ,dy<br>
+$$</p>
+<p>If <code>\(\mathcal{D}=[a,b]\)</code>, then <code>\(\nu_k\)</code> has a stable and easy formula.</p>
+<p>The exactness is in fact up to <code>\(\deg(2n-1)\)</code>.</p>
+<p>If <code>\(\mathcal{G}\in\mathbb{P}^{2n-1}(\mathcal{D})\)</code>, there exists <code>\(q,r \in\mathbb{P}^{n-1}(\mathcal{D})\)</code> s.t.</p>
+<p>$$  \mathcal{G} = \pi_nq  + r$$</p>
+<p>Then <code>\(r\in \in\mathbb{P}^{n-1}(\mathcal{D})\)</code></p>
+<p>$$
+r(\lambda_k) =  \mathcal{G}(\lambda_k) - \pi_n(\lambda_k) q(\lambda_k) = \mathcal{G}(\lambda_k)
+$$</p>
+<p>And thus <code>\(r=Q^\mathcal{G}\)</code> through a similar argument as before.</p>
+<p>$$
+<code>\begin{aligned} &amp; \int_{\mathcal{D} }\mathcal{G}(y) f_Y(y) \,dy \\ &amp;= \int_{\mathcal{D} }(\pi_nQ^\mathcal{G}+r)(y) f_Y(y) \,dy \\ &amp;= \int_{\mathcal{D} }\pi_nQ^\mathcal{G}(y) f_Y(y) \,dy + \int_{\mathcal{D} }r(y) f_Y(y) \,dy \\ &amp;= \int_{\mathcal{D} } \langle\pi_n,Q\rangle + \int_{\mathcal{D} }r(y) f_Y(y) \,dy \\ &amp;=\int_{\mathcal{D} }r(y) f_Y(y) \,dy \quad\quad\left(\langle\pi_n,Q\rangle= 0\quad \text{due to orthogonality}\right)\\ &amp;= \sum_{k=1}^n \mathcal{G}(\lambda_k)\nu_k \end{aligned}</code>
+$$</p>
+<p>Newton-Cotes Quadrature:</p>
+<ul>
+<li>
+<p><code>\(\mathcal{D}=[a,b]\)</code></p>
+</li>
+<li>
+<p><code>\(\lambda_k=a+k\Delta x\)</code> (equally spaced)</p>
+</li>
+<li>
+<p>Don&rsquo;t do it.</p>
+</li>
+</ul>
+<p>Now that</p>
+<p>$$
+\int_{\mathcal{D}}\mathcal{G}(y) f_Y(y) ,dy = \sum_{k=1}^n \mathcal{G}(\lambda_k)\nu_k
+$$</p>
+<p>Statement: If <code>\(m\geq 2n\)</code>, <code>\(\exists \mathcal{G}\in \mathbb{P}^m(\mathcal{D})\)</code> s.t.</p>
+<p>$$ I \neq \sum_{k=1}^n \nu_k \mathcal{G} (\lambda_k)$$</p>
+<p>Proof: Let <code>\(\mathcal{G} = \pi_n^2\)</code>. Then <code>\(\deg(\mathcal{G}) = 2n\)</code></p>
+<p>Thus</p>
+<p>$$ I = \int_{\mathcal{D}} \pi^2_n(s) f(s) ,ds = \langle \pi_n, \pi_n  \rangle_f &gt;0$$</p>
+<p>Now consider</p>
+<p>$$\sum_{k=1}^n\nu_k \mathcal{G} (\lambda_k) = \sum_{k=1}^n\nu_k [\pi_n (\lambda_k)]^2 = 0 $$
+This is a proof by contradiction.</p>
+<p>Now consider <code>\(\mathcal{G} = \pi_nq+r\)</code>.</p>
+<p>$$ \int_{\mathcal{D}} \mathcal{G}(s) f(s) ,ds = \int_{\mathcal{D}} \pi_n(s)q(s) f(s) ,ds +\int_{\mathcal{D}} r(s) f(s) ,ds $$.</p>
+<p>Note that <code>\(\deg(r) &lt;n\)</code>. Thus,</p>
+<p>$$\int_{\mathcal{D}} r(s) f(s) ,ds = \sum_{k=1}^n \nu_kr(\lambda_k) $$</p>
+<p>So if <code>\(\deg(\mathcal{G})&lt;2n\)</code>, <code>\(\deg(q)&lt;n\)</code>, and the equation holds due to orthogonality.</p>
+<p>Consider the interpolated polynomial</p>
+<p>$$Q^\mathcal{G}(x) = \sum_{k=1}^n \mathcal{G}(\lambda_k) \ell_k(x) $$</p>
+<p>GQ is exact of <code>\(\deg(2n-1)\)</code>.  Large <code>\(n\)</code> would get better approximation.</p>
+<p>Suppose <code>\(g\)</code> is some numerically defined function that takes a long time to evaluate for any <code>\(g(\lambda_k)\)</code>.</p>
+<p>Calculating</p>
+<p><code>$$\sum_{k=1}^n \nu_k \mathcal{G}(\lambda_k)$$</code></p>
+<p>, while certainly more efficient to trapezoids, is still slow. One might want to &ldquo;reuse&rdquo; quadrature points:</p>
+<p>If <code>\(\lambda_k^{(n)}\)</code> is a root of <code>\(\pi_n\)</code>, is <code>\(\lambda_k^{(n)}\)</code> also a root of <code>\(\pi_{m}\)</code> if <code>\(m&gt;n\)</code>? Unfortunately, no for GQ.</p>
+<p>Suppose there exists <code>\(q\in\mathbb{P}^n(\mathcal{D})\)</code>, such that <code>\(\pi_{n+1}=q(x)(x-\lambda_k^{(n)})\)</code></p>
+<p>Thm: Let <code>\(\{\lambda_i^{(n)}\}_1^n\)</code> be the roots of <code>\(\pi_n\)</code>. WLOG let</p>
+<p><code>$$\lambda_1^{(n)}&lt;\lambda_2^{(n)}&lt;\lambda_3^{(n)}&lt;\cdots&lt;\lambda_n^{(n)}$$</code></p>
+<p>Then for <code>\(n&gt;2\)</code>, every consecutive pair <code>\(\lambda_k^{(n)}\)</code> and <code>\(\lambda_{k+1}^{(n)}\)</code>, there is at least one root of <code>\(\pi_m\)</code> for any <code>\(m&gt;n\)</code>.</p>
+<p>That is for any <code>\(\pi_m\)</code> s.t. <code>\(m&gt;n\)</code>, <code>\(\exists \lambda_i^{(m)} \in \left(\lambda_k^{(n)},\lambda_{k+1}^{(n)}\right)\)</code></p>
+<p>Pf: Let <code>\(a=\lambda_k^{(n)}\)</code> and <code>\(b=\lambda_{k+1}^{(n)}\)</code>,</p>
+<p>Define</p>
+<p>$$ g(x)=c^2 (x-a)(x-b) \prod_{j\neq k,j\neq k+1} \left(\frac{x-\lambda_j}{\lambda_k-\lambda_j}\right)^2$$</p>
+<p>Incidentally,</p>
+<p><code>$$\pi_n = c(x-\lambda_1^{(n)})(x-\lambda_2^{(n)})\cdots(x-a)(x-b)\cdots (x-\lambda_n^{(n)})$$</code></p>
+<p>Then <code>\(g(x)\)</code> is exact given GQ. But also, <code>\(m\)</code>-point GQ is exact for any <code>\(m&gt;n\)</code>. Thus,
+$$
+<code>\begin{aligned} \int_{\mathcal{D}} g(s)f(s) \,ds &amp;= \int_{\mathcal{D}} c^2 (x-a)(x-b) \prod_{j\neq k,j\neq k+1} \left(\frac{x-\lambda_j}{\lambda_k-\lambda_j}\right)^2f(s) \,ds \\ &amp;= \int_{\mathcal{D}} \left [ c (x-a)(x-b) \prod_{j\neq k,j\neq k+1} \left(\frac{x-\lambda_j}{\lambda_k-\lambda_j}\right) \right ]\cdot \left [ c \prod_{j\neq k,j\neq k+1} \left(\frac{x-\lambda_j}{\lambda_k-\lambda_j}\right) \right ] f(s) \,ds \\ &amp;= \int_{\mathcal{D}}\pi_n\cdot \left [ c \prod_{j\neq k,j\neq k+1} \left(\frac{x-\lambda_j}{\lambda_k-\lambda_j}\right) \right ] f(s) \,ds \\ &amp;= 0 \end{aligned}</code>
+$$</p>
+<p>where the last equality holds due to orthogonality. However, suppose for contradiction that <code>\((a,b)\)</code> has no roots for some <code>\(\pi_m\)</code> s.t. <code>\(m&gt;n\)</code>:</p>
+<p>For some <code>\(x \notin(a,b)\)</code>, then either</p>
+<ul>
+<li>
+<p><code>\(x\leq a&lt;b\)</code>:
+<code>\(x-a\leq 0\)</code>, <code>\(x-b&lt;0\)</code>. Thus <code>\((x-a)(x-b)\geq 0\)</code> .</p>
+</li>
+<li>
+<p><code>\(a&lt;b\leq x\)</code>
+<code>\(x-b\geq 0\)</code>, <code>\(x-a&gt;0\)</code>. Thus <code>\((x-a)(x-b)\geq 0\)</code> .</p>
+</li>
+</ul>
+<p>So <code>\(g(x)&gt;0\)</code> almost everywhere with exception that <code>\(g(\lambda_k^{(n)})\)</code>. Recall that a property holds almost everywhere if it is only violate at a set with measure zero.</p>
+<p>Now let <code>\(\lambda_1^{(m)} &lt; \lambda_2^{(m)} &lt; \cdots &lt; \lambda_m^{(m)}\)</code> be the roots of <code>\(\pi_m\)</code>. Since <code>\(m&gt;n\)</code>, ther eis at least one root of <code>\(\pi_m\)</code> that is not a root of <code>\(\pi_n\)</code>, denoted as <code>\(\lambda_{i*}^{(m)}\)</code>.</p>
+<p>Thus</p>
+<p>$$
+<code>\begin{aligned} \int_{\mathcal{D}} g(s) f(s) \,ds &amp;= \sum_{k=1}^m \nu_k g(\lambda^{(m)}_{k}) \\ &amp;=\nu_{i*}g(\lambda^{(m)}_{i*}) + \sum_{k=1,k\neq i*}^m \nu_k g(\lambda^{(m)}_{k}) \\ \end{aligned}</code>
+$$</p>
+<p>which is strictly positive due to <code>\(\nu_{i*}g(\lambda^{(m)}_{i*})&gt;0\)</code>. However, exactness implies that</p>
+<p><code>$$\int_{\mathcal{D}} g(s) f(s) \,ds =0$$</code></p>
+<h2 id="stochastic-process">Stochastic Process</h2>
+<p>Let $y(x,t;\xi) \in L^2_c(\mathbb{R};f) $ for all <code>\((x,t)\in \mathbb{R}_x\times\mathbb{R}_t \geq 0\)</code>.</p>
+<p>Then we can write the polynomial chaos expansion (PCE) when <code>\(\xi\sim \mathcal{N}(0,1)\)</code></p>
+<p>$$y(x,t;\xi) = \sum_{k=0}^\infty y_k(x,t) H_k(\xi) $$</p>
+<p>where <code>\(y_k:\mathbb{R}_x\times\mathbb{R}_t \to \mathbb{R}\)</code>, and <code>\(\{H_k\}\)</code> are Hermite orthogonal polynomials wrt <code>\(\xi\sim \mathcal{N}(0,1)\)</code>.This inevitably involves sampling.</p>
+<p>Example: Solving a PDE with uncertain initial condition (inviscid Burger&rsquo;s Equation):</p>
+<p>$$ \frac{\partial y}{\partial t} + y \frac{\partial y}{\partial x}  = 0$$</p>
+<p>We suspect the form to be <code>\(y(x,t=0;\xi) = \xi \sin(x)\)</code></p>
+<p>The general PDE solution is thus a stochastic process $y(x,t;\xi) $ for all <code>\((x,t)\in \mathbb{R}_x\times\mathbb{R}_t \geq 0\)</code>.</p>
+<p>We introduce the truncated PCE to avoid sampling:</p>
+<p>$$y^{(M)}(x,t;\xi) = \sum_{k=0}^M y_k(x,t) H_k(\xi) $$</p>
+<p>By converging properties,</p>
+<p>$$ \lim_{M\to\infty} y^{(M)} \to y$$</p>
+<p>Substitute <code>\(y^{(M)}\)</code> in to the original PDE:</p>
+<p>$$
+<code>\begin{aligned} &amp;\frac{\partial}{\partial t} \left[\sum_{i=0}^M y_i(x,t) H_i(\xi)\right] + \left(\sum_{i=0}^M y_i(x,t) H_i(\xi)\right) \frac{\partial}{\partial x} \left[\sum_{i=0}^M y_i(x,t) H_i(\xi)\right] \\  &amp;= \sum_{i=0}^M \frac{\partial y_i(x,t)}{\partial t} H_i(\xi) + \sum_{i=0}^M\sum_{j=0}^M y_i(x,t)\frac{\partial y_j(x,t)}{\partial t} H_i(\xi)H_j(\xi) \\ &amp;=0 \end{aligned}</code>
+$$</p>
+<p>Multiply through by <code>\(H_k(\xi)\)</code> for some fixed <code>\(k\in[0,M]\)</code>:</p>
+<p>$$
+`\begin{aligned}
+\sum_{i=0}^M \frac{\partial y_k(x,t)}{\partial t}H_i(\xi) H_k(\xi) + \sum_{i=0}^M\sum_{j=0}^M y_i(x,t)\frac{\partial y_j(x,t)}{\partial t} H_i(\xi)H_j(\xi) H_k(\xi) &amp;= 0  \
+\sum_{i=0}^M \frac{\partial y_k(x,t)}{\partial t}\int_{\mathbb{R}} H_i(\eta) H_k(\eta) f(\eta) ,d\eta + \sum_{i=0}^M\sum_{j=0}^M y_i(x,t)\frac{\partial y_j(x,t)}{\partial t} \int_{\mathbb{R}}  H_i(\eta)H_j(\eta) H_k(\eta) ,d\eta&amp;= 0  \</p>
+<p>\sum_{i=0}^M \frac{\partial y_k(x,t)}{\partial t}\langle H_i,H_k \rangle_f + \sum_{i=0}^M\sum_{j=0}^M y_i(x,t)\frac{\partial y_j(x,t)}{\partial t} \langle H_iH_j,H_k \rangle_f&amp;= 0  \
+\end{aligned}`
+$$</p>
+<p>For Hermite <code>\(\{H_k\}\)</code>, <code>\(\langle H_k,H_k \rangle_f = k!\)</code> and</p>
+<p>$$
+\langle H_iH_j,H_k \rangle_f =
+<code>\begin{cases} \frac{i!j!k!}{(s-i)!(s-j)！(s-k)!}, \text{ where } s=\frac{i+j+k}{2}, \max(i,j,k)&lt;s \\ 0, \text{ otherwise,} \end{cases}</code>
+$$</p>
+<p>Thus the equation above simplifies to</p>
+<p>$$
+<code>\begin{aligned} \frac{\partial y_k(x,t)}{\partial t} k! + \sum_{i=0}^M\sum_{j=0}^M y_i(x,t)\frac{\partial y_j(x,t)}{\partial t} \langle H_iH_j,H_k \rangle_f&amp;= 0 \end{aligned}</code>
+$$</p>
+<ul>
+<li>
+<p>This becomes a deterministic system of PDEs with size <code>\(M+1\)</code>.</p>
+</li>
+<li>
+<p>A solution <code>\(\{y_k\}_0^M\)</code>, you can then plug your coefficient functions into your solution approximation</p>
+</li>
+</ul>
+<p><code>$$y^M = \sum_{k=0}^M y_k(x,t) H_k(\xi) \approx y$$</code></p>
+<p>Example: <code>\(M=1\)</code>,</p>
+<p>$$
+`\begin{cases}
+\frac{\partial y_0}{\partial t} + y_0 \frac{\partial y_0}{\partial t} + y_1 \frac{\partial y_1}{\partial t} = 0 \</p>
+<p>\frac{\partial y_1}{\partial t} + y_0 \frac{\partial y_0}{\partial t} + y_1 \frac{\partial y_0}{\partial t} = 0 \
+\end{cases}`
+$$</p>
+<p>2 partial differential equations, 2 unknowns.</p>
+<p>Can numerically solve for both of them via scipy.ode</p>
+<p>Now consider the example of the heat diffusion question:</p>
+<ul>
+<li>
+<p><code>\(t\in\mathbb{R}^+\)</code> time</p>
+</li>
+<li>
+<p><code>\(x\in [0,L]\)</code> position</p>
+</li>
+<li>
+<p>PDE solution</p>
+</li>
+<li>
+<p><code>\(u(x,y;\xi)\)</code> is the temperature at a given point <code>\(x\)</code> and time <code>\(t\)</code>, with <code>\(\xi\sim \mathcal{N}(0,1)\)</code></p>
+</li>
+</ul>
+<p>Deterministic version:</p>
+<p><code>$$\frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2}$$</code></p>
+<p>with initial value</p>
+<ul>
+<li>
+<p><code>\(u(x,0)=\sin(x)\)</code></p>
+</li>
+<li>
+<p><code>\(u(0,t)=u(L,t)\)</code></p>
+</li>
+</ul>
+<p>Stochastic Version:</p>
+<p><code>$$\frac{\partial u}{\partial t} = \xi \frac{\partial^2 u}{\partial x^2}$$</code></p>
+<p>with initial value and constraint</p>
+<ul>
+<li>
+<p><code>\(u(x,0)=\sin(x)\)</code></p>
+</li>
+<li>
+<p><code>\(u(0,t)=u(L,t)\)</code></p>
+</li>
+<li>
+<p><code>\(\xi\sim \mathcal{N}(0,1)\)</code></p>
+</li>
+</ul>
+<p>Strategy: Galerkin Projection</p>
+<ul>
+<li>Substitute a truncated PCE <code>\(u^{(M)}\)</code> for the true solution of the original PDE, where</li>
+</ul>
+<p><code>$$u^{(M)} = \sum_{k=0}^M u_k(x,t)H_k(\xi)$$</code></p>
+<ul>
+<li>Multiply through by an <code>\(H_k(\xi)\)</code> for some fixed but arbitrary <code>\(k\in \{0,\cdots,M\}\)</code>.</li>
+</ul>
+<p>Integrate with respect to <code>\(\xi\)</code>, and (ideally) use orthogonality to simplify</p>
+<p><code>$$\sum_{k=0}^M \frac{\partial u_k(x,t)}{\partial t} H_k(\xi) = \xi \sum_{k=0}^M \frac{\partial ^2 u_k(x,t)}{\partial x^2} H_k(\xi)$$</code></p>
+<p><code>$$\sum_{k=0}^M \frac{\partial u_k(x,t)}{\partial t} \int_{\mathbb{R}} H_i(\xi)H_k(\xi) \,d\xi=  \sum_{k=0}^M \frac{\partial ^2 u_k(x,t)}{\partial x^2} \int_{\mathbb{R}} H_i(\xi)H_k(\xi) \xi \,d\xi$$</code></p>
+<p>Recall that <code>$$\int_{\mathbb{R}} H_i(\xi)H_k(\xi) \,d\xi = \delta_{ik}k!$$</code></p>
+<p>Note that <code>\(\xi = H_1(\xi)\)</code>. Thus the equation simplifies to</p>
+<p><code>$$\sum_{k=0}^M \frac{\partial u_k(x,t)}{\partial t} \delta_{ik}k!=  \sum_{k=0}^M \frac{\partial ^2 u_k(x,t)}{\partial x^2} \langle H_i(\xi),H_k(\xi)H_1(\xi)  \rangle$$</code></p>
+<p>with initial conditions</p>
+<ul>
+<li>
+<p><code>\(u(x,0;\xi)=\sin(x)\)</code></p>
+</li>
+<li>
+<p><code>\(u^{(M)}(x,0;\xi) = \displaystyle \sum_{k=0}^M u_k(x,0) H_k(\xi)\)</code></p>
+</li>
+</ul>
+<p><code>$$\sum_{k=0}^M u_k(x,0) \int_{\mathbb{R}} H_i(\xi)H_k(\xi) \,d\xi = \left[\int_{\mathbb{R}}H_i(\xi) \,d\xi\right]\sin(x) = \delta_{i,0}\sin(x)$$</code></p>
+<p>Thus <code>\(u_i(x,0) = \frac{1}{i!}\delta_{i,0}\sin(x)=\sin(x)\mathbf{1}_{i==0}\)</code></p>
+<p>For <code>\(i=0,1,\cdots,M\)</code>, the equations are deterministic, and thus easy to solve.</p>
+<p>But what if our initial equation was <code>$$\frac{\partial u}{\partial t} = P^n(\xi) \frac{\partial^2 u}{\partial x^2}$$</code> where <code>\(P^n\)</code> is a polynomial of <code>\(n\)</code> degrees instead of <code>$$\frac{\partial u}{\partial t} = \xi \frac{\partial^2 u}{\partial x^2}$$</code></p>
+<p>Recall that <code>\(\mathbb{P}^n(\mathbb{R})=\operatorname{span}\{\pi_k\}_{0}^{n}\)</code></p>
+<p>For <code>\(\pi_k=H_k\)</code>, any polynomials of degree at most <code>\(n\)</code> in the variable <code>\(\xi\)</code>, namely any <code>$$p(\xi) = \sum_{j=0}^n c_j \xi^j$$</code> can be rewritten as <code>$$p(\xi) = \sum_{i=0}^n d_i H_i(\xi)$$</code></p>
+<h3 id="hermite-polynomials">Hermite Polynomials:</h3>
+<p>Hermite Polynomials in <code>\(d\)</code> dimensions for <code>\(\Xi\sim\mathcal{N}(0_n,I_n)\)</code>,</p>
+<p>That is,</p>
+<p><code>$$\Xi = (\xi_1,\xi_2,\cdots , \xi_n)^T \sim \mathcal{N}(\vec\mu,\Sigma)$$</code></p>
+<p>where</p>
+<p><code>$$\xi_i\sim\mathcal{N}(\mu_i,\Sigma_{ii})$$</code></p>
+<p>and</p>
+<p><code>$$\operatorname{cov}(\xi_i,\xi)j =\Sigma_{ij}$$</code></p>
+<p><code>$$H_{\vec{\alpha}}^{(d)}(\Xi) = \frac{(-1)^{\|\vec{\alpha}\|_1}}{f(\Xi)} \partial ^{\vec{\alpha}}(f(\Xi))$$</code></p>
+<p>where <code>\(\vec{\alpha}\in \mathbb{N}_0^n\)</code> is a multi-index s.t.</p>
+<ul>
+<li>
+<p><code>$$\|\vec{\alpha}\| = \sum_{i=1}^n \alpha_i$$</code></p>
+</li>
+<li>
+<p><code>$$\partial^{\vec{\alpha}}= \partial^{\alpha_1} \partial^{\alpha^2}\cdots \partial^{\alpha_n}$$</code></p>
+</li>
+</ul>
+<p>Operations:</p>
+<ul>
+<li>
+<p><code>\(\alpha+\beta = (\alpha_1+\beta_1, \cdots, \alpha_n+\beta_n)\)</code></p>
+</li>
+<li>
+<p><code>\(\alpha! = \prod\limits_{i=1}^n a_i!\)</code></p>
+</li>
+<li>
+<p><code>$$\frac{\partial^{\vec{\alpha}}}{\partial x^{\vec{\alpha}}} = \frac{\partial^\alpha_1 }{\partial x_1^{\alpha_1} } \cdots \frac{\partial^\alpha_n }{\partial x_n^{\alpha_n} }$$</code></p>
+</li>
+</ul>
+<p>Thus define the multivariate Hermite Polynomials as:</p>
+<p><code>$$H_{\vec{\alpha}}(\vec{x}) = \delta_{0,\|\alpha\|_1} + \frac{(-1)^{\|\vec{\alpha}\|_1}}{f(\vec{x})}\frac{\partial^{\vec{\alpha}}}{\partial x^{\vec{\alpha}}} [f(\vec{x})] (1-\delta_{0,\|\alpha\|_1})$$</code></p>
+<p>Now consider</p>
+<p>$$
+`\begin{aligned}
+&amp;\frac{(-1)^{|\vec{\alpha}|<em>1}}{f(\vec{x})}\frac{\partial^{\vec{\alpha}}}{\partial x^{\vec{\alpha}}} [f(\vec{x})] \ 
+&amp;=\prod</em>{i=1}^n \left(\frac{(-1)^{\alpha_i}}{f_i(x_i)}\frac{\partial^{\alpha_i}}{ \partial x_i^{a_i}} f_i(x_i)\right) \</p>
+<p>&amp;= \prod_{i=1}^n H_{\alpha_i(x_i)}
+\end{aligned}`
+$$</p>
+<p>Now consider <code>\(H_\vec \alpha (\vec x)\)</code> and <code>\(H_\vec \beta (\vec x)\)</code>. Do we have <code>\(\langle H_\vec \alpha, H_\vec  \beta\rangle = 0\)</code> when <code>\(\alpha\neq\beta\)</code>?</p>
+<p>By Fubini&rsquo;s Theorem,</p>
+<p><code>$$\int_{\mathbb{R}^n} H_\vec \alpha (\vec x)H_\vec \beta (\vec x) f(\vec x) \,d\vec x = \int_{\mathbb{R}}\int_{\mathbb{R}}\cdots\int_{\mathbb{R}} H_\vec \alpha (\vec x)H_\vec \beta (\vec x) f(\vec x) \,dx_1 \,dx_2 \cdots \,dx_n$$</code></p>
+<p>Now consider</p>
+<p>$$
+<code>\begin{aligned} &amp;\int_{\mathbb{R}}\int_{\mathbb{R}}\cdots\int_{\mathbb{R}} \  \prod_{i=1}^n H_{\alpha_i(x_i)}H_{\beta_i(x_i)} f(x_i)\,dx_i \\ &amp;= \int_{\mathbb{R}}\int_{\mathbb{R}}\cdots\int_{\mathbb{R}}  \prod_{i=1}^n H_{\alpha_i(x_i)}H_{\beta_i(x_i)}  f(x_i)\,dx_i \\ &amp;=\prod_{i=1}^n \int_{\mathbb{R}}   H_{\alpha_i(x_i)}H_{\beta_i(x_i)}  f(x_i)\,dx_i \\ &amp;=\prod_{i=1}^n \int_{\mathbb{R}}   H_{\alpha_i(x_i)}H_{\beta_i(x_i)}  \,d \xi_i \\ &amp;=\prod_{i=1}^n  \langle H_{\alpha_i(x_i)}H_{\beta_i(x_i)}  \rangle_{\xi_i}  = 0 \\ \end{aligned}</code>
+$$</p>
+<p>For <code>\(u(x,t;\Xi)\)</code>, a stochastic process indexed by <code>\((x,t)\in \mathbb{R}_x\times\mathbb{R}_t\)</code> with <code>\(\Xi\sim \mathcal{N}(0_n,I_n)\)</code>, if <code>\(\operatorname{Cov}_\xi (u(x,t;\Xi))&lt;\infty\)</code> then we can write</p>
+<p><code>$$\sum_{\alpha\in\mathbb{N}_0^n} u_\alpha(x,y) H_{\vec \alpha} (\Xi) = u(x,t;\Xi)$$</code></p>
+<h3 id="simple-finite-difference-of-solving-pde">Simple Finite Difference of solving PDE:</h3>
+<p>Consider the pde <code>$$u^{\prime\prime}=g$$</code>, with <code>\(0\leq x \leq 1\)</code> with boundary conditions <code>\(u(0)=\alpha,u(1)=\beta\)</code>.</p>
+<ul>
+<li>
+<p>Put uniform grid on domain,</p>
+</li>
+<li>
+<p><code>\(x_j = jh, j =0,1,\cdots,\frac 1n\)</code>.</p>
+</li>
+<li>
+<p><code>\(u_j := u(x_j)\)</code></p>
+</li>
+</ul>
+<p>Locally, by Taylor expansion,</p>
+<p><code>$$u(x+h) = u(x) +u^\prime(x)h+u^{\prime\prime}$$</code></p>
+<p>For small <code>\(h\)</code>,</p>
+<p><code>$$u_1^\prime (x) \approx \frac{u(x+h)-u(x)}{h}$$</code></p>
+<p><code>$$u_2^\prime (x) \approx \frac{u(x)-u(x-h)}{h}$$</code></p>
+<p><code>$$u_3^\prime (x) \approx \frac{u(x+h)-u(x-h)}{2h}$$</code></p>
+<p>The first order derivative of the first order derivative is the second order derivative:</p>
+<p><code>$$u^{\prime\prime}(x)\approx \frac{u^{\prime}(x)-u^{\prime}(x-h)}{h} \approx  \frac{\frac{u(x+h)-u(x)}{h} -\frac{u(x)-u(x-h)}{h} }{h}  = \frac{u(x+h)+u(x-h)-2u(x)}{2h^2}$$</code></p>
+<p>or, under the notation of <code>\(u_j\)</code>,</p>
+<p><code>$$\frac{u_{j+1}+u_{j-1}-2u_{j}}{2h^2}$$</code></p>
+<p>With Constraints and  Boundary Values</p>
+<ul>
+<li>
+<p><code>\(j=1,2,\cdots,m-1\)</code></p>
+</li>
+<li>
+<p><code>\(u_0=u(x_0)=\alpha\)</code></p>
+</li>
+<li>
+<p><code>\(u_m=u(x_m)=\beta\)</code></p>
+</li>
+<li>
+<p>Other Methods:</p>
+<ul>
+<li>Runge-Kutla Methods
+Runge-Kutta methods are a family of numerical methods used to solve ordinary differential equations. They are based on the idea of approximating the solution of an initial value problem by a weighted sum of function values at different points. The most commonly used member of this family is the fourth-order Runge-Kutta method, which has the following formula:</li>
+</ul>
+</li>
+</ul>
+<p>$$
+<code>\begin{aligned} k_1 &amp;= f(t_n, y_n) \\ k_2 &amp;= f(t_n + \frac{h}{2}, y_n + \frac{h}{2} k_1) \\ k_3 &amp;= f(t_n + \frac{h}{2}, y_n + \frac{h}{2} k_2) \\ k_4 &amp;= f(t_n + h, y_n + h k_3) \\ y_{n+1} &amp;= y_n + \frac{h}{6} (k_1 + 2k_2 + 2k_3 + k_4) \end{aligned}</code>
+$$</p>
+<p>where <code>\(f\)</code> is the function defining the differential equation, <code>\(t_n\)</code> and <code>\(y_n\)</code> are the values of the independent and dependent variables at time step <code>\(n\)</code>, <code>\(h\)</code> is the step size, and <code>\(k_1\)</code>, <code>\(k_2\)</code>, <code>\(k_3\)</code>, and <code>\(k_4\)</code> are intermediate variables calculated at different points in the interval <code>\([t_n, t_{n+1}]\)</code>.</p>
+<p>This method is called &ldquo;fourth-order&rdquo; because the error in the numerical solution is of order <code>\(O(h^4)\)</code>, where <code>\(h\)</code> is the step size. It is widely used due to its simplicity, accuracy, and efficiency.</p>
+<ul>
+<li>so-called &ldquo;shooting problems&rdquo;</li>
+</ul>
+<h3 id="viscous-burgers-with-stochastic-conditions">Viscous Burger&rsquo;s with Stochastic Conditions:</h3>
+<p>$$ \frac{\partial u }{\partial t} + u\frac{\partial u}{\partial x} = (1+\xi_1^2)$$</p>
+<p>with <code>\(u(x,t,\Xi) = \xi_1+\xi_2\sin(x)\)</code></p>
+<p>Assuming that <code>\(\operatorname{Var}[u(x,t,\Xi)\)</code> is finite.</p>
+<p>Multiple PCE:</p>
+<p><code>$$u^{(M)}(x,t;\Xi) = \sum_{|\vec{\alpha}|\leq M, \alpha=\{1,2\}} u_\alpha(x,t)H_\alpha(\Xi)$$</code></p>
+<p>Substitute that into the original PDE and get:</p>
+<p>$$\frac{\partial}{\partial t}\left[\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t)H_\alpha(\Xi)\right] + \left[\sum_{|\vec{\alpha}|\leq M}\sum_{|\vec{\beta}|\leq M}u_\alpha(x,t)\frac{\partial u_\beta(x,t)}{\partial t}H_\alpha(\Xi)H_\beta(\Xi)\right] \ , =(1+\xi_1^2) \frac{\partial^2}{\partial x^2}\left[\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t)H_\alpha(\Xi)\right]  $$</p>
+<p>Multiply by <code>\(H_\gamma(\Xi)\)</code></p>
+<p>$$\frac{\partial}{\partial t}\left[\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t)H_\alpha(\Xi)H_\gamma(\Xi)\right] + \left[\sum_{|\vec{\alpha}|\leq M}\sum_{|\vec{\beta}|\leq M}u_\alpha(x,t)\frac{\partial u_\beta(x,t)}{\partial t}H_\alpha(\Xi)H_\beta(\Xi)H_\gamma(\Xi)\right] \ , =(1+\xi_1^2) \frac{\partial^2}{\partial x^2}\left[\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t)H_\alpha(\Xi)H_\gamma(\Xi)\right]  $$</p>
+<p>Now consider</p>
+<p>$$\sum_{|\vec{\alpha}|\leq M}\frac{\partial}{\partial t}\iint_{\mathbb{R}^2}\left[u_\alpha(x,t)H_\alpha(\Xi)H_\gamma(\Xi)\right] ,d\Xi \ + \sum_{|\vec{\alpha}|\leq M}\sum_{|\vec{\beta}|\leq M}u_\alpha(x,t)\frac{\partial u_\beta(x,t)}{\partial t} \iint_{\mathbb{R}^2} \left[H_\alpha(\Xi)H_\beta(\Xi)H_\gamma(\Xi)\right]  ,d\Xi \ , = \frac{\partial^2}{\partial x^2}\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t) \iint_{\mathbb{R}^2}\left[(1+\xi_1^2)H_\alpha(\Xi)H_\gamma(\Xi)\right] ,d\Xi  $$</p>
+<p>Recall that integrals can calculate inner products. Namely,</p>
+<p><code>$$\langle  H_{\vec{\alpha}},H_{\vec{\gamma}}  \rangle_{\Xi} := \iint_{\mathbb{R}^2}\left[u_\alpha(x,t)H_\alpha(\Xi)H_\gamma(\Xi)\right] \,d\Xi$$</code></p>
+<p><code>$$\langle  H_{\vec{\alpha}}H_{\vec{\beta}}, H_{\vec{\gamma}}  \rangle_{\Xi} := \iint_{\mathbb{R}^2}\left[u_\alpha(x,t)H_\alpha(\Xi)H_\beta(\Xi)H_\gamma(\Xi)\right] \,d\Xi$$</code></p>
+<p>And the original equation becomes</p>
+<p>$$\sum_{|\vec{\alpha}|\leq M}\frac{\partial u_\alpha(x,t)}{\partial t}\langle  H_{\vec{\alpha}},H_{\vec{\gamma}}  \rangle_{\Xi} + \sum_{|\vec{\alpha}|\leq M}\sum_{|\vec{\beta}|\leq M}u_\alpha(x,t)\frac{\partial u_\beta(x,t)}{\partial t} \langle  H_{\vec{\alpha}}H_{\vec{\beta}}, H_{\vec{\gamma}}  \rangle_{\Xi}  \ , = \frac{\partial^2}{\partial x^2}\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t) \left[\langle  H_{\vec{\alpha}}H_{(2,0)}, H_{\vec{\gamma}}  \rangle_{\Xi} +2 \langle  H_{\vec{\alpha}},H_{\vec{\gamma}}  \rangle_{\Xi} \right]  $$</p>
+<p>Which, due to the orthogonality of Hermite Polynomials previously discussed, simplifies to</p>
+<p>$$\frac{\partial u_\alpha(x,t)}{\partial t}\langle  \vec{\gamma}! + \sum_{|\vec{\alpha}|\leq M}\sum_{|\vec{\beta}|\leq M}u_\alpha(x,t)\frac{\partial u_\beta(x,t)}{\partial t} \langle  H_{\vec{\alpha}}H_{\vec{\beta}}, H_{\vec{\gamma}}  \rangle_{\Xi}  \ , = \frac{\partial^2}{\partial x^2}\sum_{|\vec{\alpha}|\leq M}u_\alpha(x,t) \left[\langle  H_{\vec{\alpha}}H_{(2,0)}, H_{\vec{\gamma}}  \rangle_{\Xi} +2 \langle  H_{\vec{\alpha}},H_{\vec{\gamma}}  \rangle_{\Xi} \right]  $$</p>
+
+    </div>
+  </article>
+
+  
+
+
+</main>
+
+      <footer class="footer">
+        <ul class="footer-links">
+          <li>
+            <a href="/index.xml" type="application/rss+xml" target="_blank">RSS feed</a>
+          </li>
+          <li>
+            <a href="https://gohugo.io/" class="footer-links-kudos">Made with <img src="/images/hugo-logo.png" alt="Img link to Hugo website" width="22" height="22"></a>
+          </li>
+        </ul>
+      </footer>
+
+    </div>
+    
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/yaml.min.js"></script>
+<script>hljs.configure({languages: []}); hljs.initHighlightingOnLoad();</script>
+
+
+
+    
+<script src="/js/math-code.js"></script>
+<script async src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+    
+  </body>
+</html>
+
